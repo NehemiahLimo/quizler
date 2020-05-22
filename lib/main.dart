@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
+QuizBrain _brain = new QuizBrain();
 void main() => runApp(Quizzler());
+
 
 class Quizzler extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.grey.shade900,
         body: SafeArea(
@@ -26,18 +31,59 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   List<Icon> scoreKeeper =[];
-  List<String> questions = [
-    'You can lead a cow down stairs but not up stairs.',
-    'Approximately one quarter of human bones are in the feet.',
-    'A slug\'s blood is green'
-  ];
-  List<bool> answers =[
-    false,
-    true,
-    true
-  ];
 
-  int quizNo=0;
+  void checkAnswer(bool userPick){
+    bool correctAnswer = _brain.getCorrectAnswer();
+    setState(() {
+      if(_brain.isFinished()==true){
+
+        Alert(
+          context: context,
+          title: 'Finished',
+          desc: 'Maswali yameisha kwa sasa',
+        ).show();
+        _brain.reset();
+        scoreKeeper=[];
+
+      }
+
+
+     else {
+        if (userPick == true) {
+          scoreKeeper.add(Icon(
+            Icons.check,
+            color: Colors.green,
+          ),
+          );
+        }
+        else {
+          scoreKeeper.add(Icon(
+            Icons.close,
+            color: Colors.red,
+          ),
+          );
+        }
+
+
+        _brain.nextQuiz();
+      }
+    });
+  }
+
+//  List<String> questions = [
+//    'You can lead a cow down stairs but not up stairs.',
+//    'Approximately one quarter of human bones are in the feet.',
+//    'A slug\'s blood is green'
+//  ];
+//  List<bool> answers =[
+//    false,
+//    true,
+//    true
+//  ];
+//
+//  Question q1 = new Question(q:'You can lead a cow down stairs but not up stairs.', a: false);
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +97,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                questions[quizNo],
+                _brain.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -76,21 +122,7 @@ class _QuizPageState extends State<QuizPage> {
               ),
               onPressed: () {
                 //The user picked true.
-                bool correctAnswer = answers[quizNo];
-                if(correctAnswer == true){
-                  print('Got it right');
-                }
-                else{
-                  print('Got it wrong');
-
-                }
-                setState(() {
-
-                  quizNo++;
-                  scoreKeeper.add(
-                    Icon(Icons.check, color: Colors.green,),
-                  );
-                });
+                checkAnswer(true);
               },
             ),
           ),
@@ -110,50 +142,14 @@ class _QuizPageState extends State<QuizPage> {
               ),
               onPressed: () {
                 //The user picked false.
-                bool corectAnswer = answers[quizNo];
-                if(corectAnswer == false){
-                  print('Got it right');
-                }
-                else{
-                  print('Got it wrong');
-
-                }
-                setState(() {
-                  quizNo++;
-                  scoreKeeper.add(
-                    Icon(Icons.check, color: Colors.green,),
-                  );
-                });
+                checkAnswer(false);
               },
             ),
           ),
         ),
         Row(
-          children: <Widget>[
-            Icon(
-              Icons.check,
-              color: Colors.green,
-            ),
-            Icon(
-              Icons.check,
-              color: Colors.green,
-            ),
-            Icon(
-              Icons.close,
-              color: Colors.red,
-            )
-            ,
-            Icon(
-              Icons.close,
-              color: Colors.red,
-            )
-            ,
-            Icon(
-              Icons.close,
-              color: Colors.red,
-            ),
-          ],
-        )
+          children: scoreKeeper
+        ),
         //TODO: Add a Row here as your score keeper
       ],
     );
